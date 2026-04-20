@@ -65,6 +65,7 @@ export default function Directory() {
               location="Sector Gamma"
               roles={['Medic', 'Driver']}
               img="https://lh3.googleusercontent.com/aida-public/AB6AXuDinuOnrPtlpBMJl8U9ziwCJsfkLFEuWT50JFCGjhZyU4Bdb_DVodKZ2_KT0StDDiE7bs3Up7Fi04kjtof2SpNDQsJWi4H_Cy566c1Lpw8l0rqoOc5zazxA1XWuBS2wvJUieAlUnPZt9ZNQYs71ngPzbefN9ey3GrP1RU1H0MQFQG5_-co4lJhgq6th8f0g0IEXY8IDqKGV_AIQaP0IseoYjx3t-ysgJX5XjYIvpLoa_hewVxSerzUpa8BzHwlUCk9HE6RZxLMojhTj"
+              initials="SJ"
             />
             <VolunteerCard 
               name="Sarah Chen"
@@ -118,7 +119,7 @@ function MapCluster({ top, left, number, label, type, isPulse = false }) {
   );
 }
 
-function VolunteerCard({ name, status, location, roles, img, initials }) {
+function VolunteerCard({ name, status, location, roles, img, initials }: { name: string, status: string, location: string, roles: string[], img?: string, initials: string }) {
   const isAvailable = status === 'Available';
 
   return (
