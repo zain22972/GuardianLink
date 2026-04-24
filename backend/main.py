@@ -83,34 +83,8 @@ async def chat_with_eva(body: ChatRequest):
 
 @app.get("/health")
 async def health_check():
-    """Verifies Supabase connectivity and Gemini API key validity."""
-    health_status = {
-        "status": "healthy",
-        "supabase": "disconnected",
-        "gemini": "invalid"
-    }
-    
-    # Check Supabase
-    try:
-        supabase.table("profiles").select("count", count="exact").limit(1).execute()
-        health_status["supabase"] = "connected"
-    except Exception as e:
-        health_status["status"] = "degraded"
-        health_status["supabase"] = f"error: {str(e)}"
-        
-    # Check Gemini
-    try:
-        # Simple prompt to test API key
-        model.generate_content("ping")
-        health_status["gemini"] = "valid"
-    except Exception as e:
-        health_status["status"] = "degraded"
-        health_status["gemini"] = f"error: {str(e)}"
-        
-    if health_status["status"] != "healthy":
-        raise HTTPException(status_code=503, detail=health_status)
-        
-    return health_status
+    """Simple health check for Render."""
+    return {"status": "alive"}
 
 @app.post("/extract")
 async def extract_need(request: ExtractRequest):
