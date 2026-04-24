@@ -12,13 +12,17 @@ import google.generativeai as genai
 # Load environment variables
 load_dotenv()
 
-# Configuration
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# Configuration - Check for both standard and VITE_ prefixes
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("VITE_SUPABASE_SERVICE_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("VITE_GEMINI_API_KEY")
 
-if not all([SUPABASE_URL, SUPABASE_SERVICE_KEY, GEMINI_API_KEY]):
-    print("WARNING: Missing environment variables. Check your .env file.")
+if not SUPABASE_URL:
+    print("CRITICAL ERROR: SUPABASE_URL is missing from environment!")
+if not SUPABASE_SERVICE_KEY:
+    print("CRITICAL ERROR: SUPABASE_SERVICE_KEY is missing from environment!")
+if not GEMINI_API_KEY:
+    print("CRITICAL ERROR: GEMINI_API_KEY is missing from environment!")
 
 # Initialize Supabase client with service_role key to bypass RLS
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
