@@ -2,6 +2,7 @@ import React from "react";
 import { ContainerScroll } from "../components/ui/container-scroll-animation";
 import { useNavigate } from "react-router-dom";
 import { Globe, ArrowRight, Shield, Zap, Info } from "lucide-react";
+import heroImage from "../assets/minimalist_dashboard.png";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export default function Landing() {
           }
         >
           <img
-            src="/src/assets/minimalist_dashboard.png"
+            src={heroImage}
             alt="GuardianLink Tactical Interface"
             className="mx-auto rounded-2xl object-contain h-full w-full"
             draggable={false}
