@@ -4,9 +4,13 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import AdminLayout from './components/AdminLayout';
 import Dashboard from './pages/Dashboard';
+import Requests from './pages/Requests';
 import Matcher from './pages/Matcher';
 import Directory from './pages/Directory';
 import Inventory from './pages/Inventory';
+import AdminMissions from './pages/AdminMissions';
+
+import { supabase } from './lib/supabase';
 
 // Volunteer Pages
 import VolunteerLayout from './components/VolunteerLayout';
@@ -15,11 +19,20 @@ import VolunteerMissions from './pages/VolunteerMissions';
 import VolunteerChat from './pages/VolunteerChat';
 
 function App() {
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState(() => localStorage.getItem('tactical_role'));
+  const [loading, setLoading] = useState(false); // No longer waiting for auth session
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme');
     return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
   });
+
+  useEffect(() => {
+    if (role) {
+      localStorage.setItem('tactical_role', role);
+    } else {
+      localStorage.removeItem('tactical_role');
+    }
+  }, [role]);
 
   useEffect(() => {
     if (isDark) {
@@ -33,10 +46,15 @@ function App() {
 
   const toggleTheme = () => setIsDark(prev => !prev);
 
+  if (loading) return null;
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={
+          role ? <Navigate to={role === 'admin' ? "/admin/dashboard" : "/volunteer/missions"} replace /> 
+               : <Landing />
+        } />
         <Route path="/login" element={
           role ? <Navigate to={role === 'admin' ? "/admin/dashboard" : "/volunteer/missions"} replace /> 
                : <Login setRole={setRole} isDark={isDark} toggleTheme={toggleTheme} />
@@ -48,9 +66,11 @@ function App() {
             <AdminLayout setRole={setRole} isDark={isDark} toggleTheme={toggleTheme}>
               <Routes>
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="requests" element={<Requests />} />
                 <Route path="matcher" element={<Matcher />} />
                 <Route path="directory" element={<Directory />} />
                 <Route path="inventory" element={<Inventory />} />
+                <Route path="missions" element={<AdminMissions />} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
               </Routes>
             </AdminLayout>

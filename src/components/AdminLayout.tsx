@@ -1,104 +1,110 @@
-import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Handshake, Users, Box, LogOut, Sun, Moon } from 'lucide-react';
-import logo from '../assets/logo.png';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Users, Box, LogOut, Zap, Brain, Settings, Shield, Activity, Navigation2 } from 'lucide-react';
 import clsx from 'clsx';
 
-export default function AdminLayout({ children, setRole, isDark, toggleTheme }) {
+export default function AdminLayout({ children, setRole, isDark, toggleTheme }: any) {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const navItems = [
-    { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Matcher', path: '/admin/matcher', icon: Handshake },
-    { name: 'Directory', path: '/admin/directory', icon: Users },
-    { name: 'Inventory', path: '/admin/inventory', icon: Box },
+  const menuItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
+    { icon: Brain, label: 'Requests', path: '/admin/requests' },
+    { icon: Zap, label: 'Matcher', path: '/admin/matcher' },
+    { icon: Navigation2, label: 'Missions', path: '/admin/missions' },
+    { icon: Users, label: 'Directory', path: '/admin/directory' },
+    { icon: Box, label: 'Inventory', path: '/admin/inventory' },
   ];
 
   return (
-    <div className="flex h-screen bg-background font-sans overflow-hidden transition-colors duration-300">
+    <div className="flex h-screen bg-background overflow-hidden font-sans selection:bg-primary/30">
+      {/* Dynamic Background Overlay */}
+      <div className="fixed inset-0 tech-bg pointer-events-none opacity-50"></div>
+
       {/* Sidebar */}
-      <aside className="w-72 bg-card border-r border-border flex flex-col h-full z-20 relative shadow-sm">
-        <div className="p-8 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-             <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
-          </div>
-          <div>
-            <h1 className="text-lg font-black text-foreground tracking-tight uppercase">Guardian<span className="text-primary">Link</span></h1>
-            <p className="text-[9px] font-bold text-muted-foreground tracking-[0.2em] uppercase leading-none mt-0.5">Admin Sector</p>
+      <aside className="w-80 bg-card/40 backdrop-blur-3xl border-r border-border/50 flex flex-col relative z-50">
+        <div className="p-10">
+          <div className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate('/')}>
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-[0_0_20px_var(--primary)] group-hover:scale-110 transition-transform duration-500">
+              <Shield className="text-white" size={24} />
+            </div>
+            <div>
+              <h1 className="text-xl font-black tracking-tighter text-foreground leading-none italic uppercase">Guardian<span className="text-primary text-glow-primary">Link</span></h1>
+              <p className="text-[8px] font-black tracking-[0.4em] text-muted-foreground uppercase mt-1 opacity-60">Strategic Command</p>
+            </div>
           </div>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1 mt-4">
-          {navItems.map((item) => {
+        <nav className="flex-1 px-6 space-y-2 overflow-y-auto no-scrollbar">
+          {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
             return (
-              <Link
-                key={item.name}
-                to={item.path}
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
                 className={clsx(
-                  "flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group",
+                  'w-full flex items-center gap-4 px-6 py-5 rounded-[1.5rem] transition-all duration-300 group relative overflow-hidden',
                   isActive 
-                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? 'bg-red-600 text-white shadow-[0_0_20px_rgba(220,38,38,0.3)] scale-[1.02]' 
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                 )}
               >
-                <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                <span className="tracking-tight">{item.name}</span>
-              </Link>
+                {isActive && (
+                  <div className="absolute left-0 w-1.5 h-8 bg-white rounded-full -translate-x-1"></div>
+                )}
+                <Icon size={20} className={clsx('transition-transform duration-500 group-hover:scale-110', isActive ? 'text-white' : (item.label === 'Dashboard' ? 'text-red-500' : 'opacity-60'))} />
+                <span className="text-[11px] font-black uppercase tracking-[0.2em] italic">{item.label}</span>
+              </button>
             );
           })}
         </nav>
 
-        <div className="p-6 border-t border-border">
-          <button 
-            onClick={() => setRole(null)}
-            className="w-full flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all group"
-          >
-            <LogOut size={18} />
-            Sign Out
-          </button>
+        <div className="p-8 space-y-4">
+           {/* Logout Section */}
+          <div className="premium-glass p-6 rounded-[2rem] border border-white/5 relative overflow-hidden group cursor-pointer" onClick={() => setRole(null)}>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center font-black italic text-primary">AD</div>
+              <div className="flex-1 overflow-hidden">
+                <p className="text-[10px] font-black text-foreground uppercase tracking-wider truncate leading-none">Admin Prime</p>
+                <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-1.5 opacity-50">Master Terminal</p>
+              </div>
+              <LogOut size={16} className="text-muted-foreground group-hover:text-destructive transition-colors" />
+            </div>
+          </div>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col">
-        <header className="sticky top-0 w-full h-16 bg-card border-b border-border px-8 flex items-center justify-between z-10 shadow-sm">
-           <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-3 py-1 bg-muted rounded-full border border-border">
-                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
-                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">System: <span className="text-foreground">Optimal</span></span>
-              </div>
-           </div>
-           
-           <div className="flex items-center gap-6">
-              <button 
-                onClick={toggleTheme}
-                className="p-2.5 rounded-xl bg-muted border border-border text-foreground hover:bg-border transition-all shadow-sm"
-                aria-label="Toggle Theme"
-              >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-
-              <div className="h-8 w-px bg-border"></div>
-
-              <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                   <p className="text-xs font-bold text-foreground">Dispatcher HQ</p>
-                   <p className="text-[10px] font-medium text-muted-foreground">ID: GL-992-TX</p>
-                </div>
-                <div className="w-9 h-9 rounded-full overflow-hidden border border-border shadow-sm">
-                   <img 
-                     className="w-full h-full object-cover" 
-                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUi7whUWZTE2m-6VoDp1R9BaSuZM600eumk8GoSAetI_WF8BLmQwThYxDPjIp5oj-aC4e01SHVQfU14hBpc1rSrVfbaIe_jOTr5ob1DL9TPDTDEq4_mA3UwmglpRZHUrVliCxksX_pNO3-xHIbLckE84LH5DGuxHE_i8TU3dZgxSR92eODp0s4W_RQ03hDspV1EJ8I_f2xoHsuPLwHkui9g4EpYLrKF09FqmoNATPsqSNdzX_dV4mGWagyVKJo9_tQTUOEsdAXRnum" 
-                     alt="User" 
-                   />
-                </div>
-              </div>
-           </div>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col relative overflow-hidden">
+        {/* Top Header Bar */}
+        <header className="h-24 px-10 flex items-center justify-between relative z-40 bg-background/20 backdrop-blur-md border-b border-border/30">
+          <div className="flex items-center gap-3">
+             <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+             <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.4em]">Grid Status: Operational</p>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="flex -space-x-3 group cursor-pointer">
+               {[1,2,3].map(i => (
+                 <div key={i} className="w-9 h-9 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] font-black ring-2 ring-transparent group-hover:ring-primary/20 transition-all">U{i}</div>
+               ))}
+               <div className="w-9 h-9 rounded-full border-2 border-background bg-primary text-white flex items-center justify-center text-[10px] font-black">+</div>
+            </div>
+            <div className="h-8 w-px bg-border/50 mx-2"></div>
+            <button 
+               onClick={toggleTheme}
+               className="relative w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center group hover:bg-foreground hover:text-background transition-all"
+            >
+              <Activity size={18} className="opacity-60 group-hover:opacity-100" />
+            </button>
+          </div>
         </header>
 
-        <div className="p-8 max-w-7xl w-full mx-auto">
-           {children}
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto no-scrollbar relative z-30">
+          <div className="p-12 max-w-[1600px] mx-auto pb-24">
+            {children}
+          </div>
         </div>
       </main>
     </div>
