@@ -14,22 +14,42 @@ load_dotenv()
 
 # Configuration - Check for both standard and VITE_ prefixes
 SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("VITE_SUPABASE_SERVICE_KEY")
+# Priority: SUPABASE_SERVICE_KEY -> VITE_SUPABASE_SERVICE_KEY -> VITE_SUPABASE_ANON_KEY (fallback)
+SUPABASE_SERVICE_KEY = (
+    os.getenv("SUPABASE_SERVICE_KEY") or 
+    os.getenv("VITE_SUPABASE_SERVICE_KEY") or 
+    os.getenv("VITE_SUPABASE_ANON_KEY")
+)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("VITE_GEMINI_API_KEY")
 
-if not SUPABASE_URL:
-    print("CRITICAL ERROR: SUPABASE_URL is missing from environment!")
-if not SUPABASE_SERVICE_KEY:
-    print("CRITICAL ERROR: SUPABASE_SERVICE_KEY is missing from environment!")
-if not GEMINI_API_KEY:
-    print("CRITICAL ERROR: GEMINI_API_KEY is missing from environment!")
+print("--- Backend Environment Check ---")
+print(f"SUPABASE_URL: {'Found' if SUPABASE_URL else 'MISSING'}")
+print(f"SUPABASE_SERVICE_KEY: {'Found' if SUPABASE_SERVICE_KEY else 'MISSING'}")
+print(f"GEMINI_API_KEY: {'Found' if GEMINI_API_KEY else 'MISSING'}")
+print("---------------------------------")
 
-# Initialize Supabase client with service_role key to bypass RLS
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+# Initialize Supabase client
+supabase = None
+if SUPABASE_URL and SUPABASE_SERVICE_KEY:
+    try:
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        print("✅ Supabase client initialized successfully.")
+    except Exception as e:
+        print(f"❌ Error initializing Supabase: {str(e)}")
+else:
+    print("⚠️ Supabase client NOT initialized due to missing credentials.")
 
 # Initialize Gemini
-genai.configure(api_key=GEMINI_API_KEY, transport='rest')
-model = genai.GenerativeModel('models/gemini-flash-latest')
+if GEMINI_API_KEY:
+    try:
+        genai.configure(api_key=GEMINI_API_KEY, transport='rest')
+        model = genai.GenerativeModel('models/gemini-flash-latest')
+        print("✅ Gemini AI initialized successfully.")
+    except Exception as e:
+        print(f"❌ Error initializing Gemini: {str(e)}")
+else:
+    model = None
+    print("⚠️ Gemini AI NOT initialized due to missing API key.")
 
 app = FastAPI(title="GuardianLink Backend", description="AI-powered disaster coordination API")
 
