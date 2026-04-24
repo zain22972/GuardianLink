@@ -34,3 +34,10 @@ dist-ssr
 .claude/
 scratch/
 skills-lock.json
+
+# Python backend
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
