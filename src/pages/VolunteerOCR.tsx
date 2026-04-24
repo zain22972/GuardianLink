@@ -98,7 +98,12 @@ export default function VolunteerOCR() {
             {loading ? (
               <div className="flex flex-col items-center gap-4">
                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                <p className="text-muted-foreground font-black text-[9px] uppercase tracking-widest italic">Analyzing via Gemini v3.1...</p>
+                <p className="text-muted-foreground font-black text-[9px] uppercase tracking-widest italic text-center">
+                  Analyzing via Gemini v3.1...<br/>
+                  <span className="text-[7px] text-primary/50 block mt-1 lowercase opacity-50">
+                    Connecting to: {import.meta.env.VITE_BACKEND_URL || 'http://localhost:8002'}
+                  </span>
+                </p>
               </div>
             ) : (
               <div className="flex flex-col items-center p-8 text-center">
