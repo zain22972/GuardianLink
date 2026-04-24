@@ -191,6 +191,26 @@ Open your browser at `http://localhost:5173` to access the app.
 
 ---
 
+## 🚀 Deployment
+
+### 1. Backend — [Render.com](https://render.com)
+1. **New Web Service**: Connect your GitHub repo.
+2. **Root Directory**: Set to `backend`.
+3. **Build Command**: `pip install -r requirements.txt`.
+4. **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+5. **Environment Variables**: Add `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, and `GEMINI_API_KEY`.
+
+### 2. Frontend — [Vercel.com](https://vercel.com)
+1. **Import Project**: Connect your GitHub repo.
+2. **Framework Preset**: Select **Vite**.
+3. **Build Settings**:
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+   - **Install Command**: `npm install`
+4. **Environment Variables**: Add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_BACKEND_URL` (use your Render URL here).
+
+---
+
 ## Modules & Pages
 
 | Page | Route | Who uses it |
