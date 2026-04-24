@@ -31,22 +31,37 @@ export default function VolunteerOCR() {
         .from('field-reports')
         .getPublicUrl(uploadData.path);
 
-      // 3. Call Python Backend
+      // 3. Call Python Backend with Timeout
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8002';
-      const response = await fetch(`${backendUrl}/extract`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image_url: publicUrl }),
-      });
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for cold starts
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Extraction failed');
+      try {
+        const response = await fetch(`${backendUrl}/extract`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image_url: publicUrl }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.detail || `Server error (${response.status})`);
+        }
+
+        const extractedData = await response.json();
+        setResult(extractedData);
+      } catch (fetchErr: any) {
+        if (fetchErr.name === 'AbortError') {
+          throw new Error('Backend took too long to respond. The server is likely waking up — please try again in 30 seconds.');
+        }
+        throw new Error(`Connection failed: Check if ${backendUrl} is correct and live.`);
       }
-
-      const extractedData = await response.json();
-      setResult(extractedData);
     } catch (err: any) {
+      console.error('OCR Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
