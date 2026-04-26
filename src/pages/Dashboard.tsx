@@ -1,6 +1,6 @@
-import { Users, AlertTriangle, CheckCircle, BarChart3, Map as MapIcon, Shield, Activity, Search, Loader2 } from 'lucide-react';
+import { Users, AlertTriangle, CheckCircle, BarChart3, Map as MapIcon, Shield, Activity, Search, Loader2, Layers } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { supabase } from '../lib/supabase';
@@ -42,6 +42,33 @@ const SAMPLES = [
   { id: 's4', lat: 17.4399, lng: 78.4983, title: 'SECUNDERABAD POINT', type: 'need' },
 ];
 
+function HeatmapLayer({ points }: { points: [number, number, number][] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!points || points.length === 0) return;
+    
+    (window as any).L = L;
+    let heatLayer: any = null;
+
+    import('leaflet.heat').then(() => {
+      heatLayer = (L as any).heatLayer(points, {
+        radius: 35,
+        blur: 25,
+        maxZoom: 12,
+        max: 1.0,
+        gradient: { 0.3: 'green', 0.5: 'yellow', 0.7: 'orange', 0.9: 'red', 1.0: 'darkred' }
+      }).addTo(map);
+    }).catch(err => console.error("Failed to load leaflet.heat", err));
+
+    return () => {
+      if (heatLayer) {
+        map.removeLayer(heatLayer);
+      }
+    };
+  }, [map, points]);
+  return null;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState([
     { label: 'Field Assets', value: '0', change: 'ACTIVE', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
@@ -51,6 +78,8 @@ export default function Dashboard() {
   ]);
   const [recentNeeds, setRecentNeeds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [heatmapPoints, setHeatmapPoints] = useState<[number, number, number][]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,6 +117,21 @@ export default function Dashboard() {
           .select('*')
           .order('created_at', { ascending: false })
           .limit(4);
+
+        // 5. Fetch all needs for heatmap
+        const { data: allNeeds } = await supabase.from('needs')
+          .select('latitude, longitude, priority')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .neq('status', 'resolved');
+
+        if (allNeeds) {
+           const points: [number, number, number][] = allNeeds.map((n: any) => {
+              const intensity = n.priority === 'critical' ? 1.0 : n.priority === 'high' ? 0.8 : n.priority === 'medium' ? 0.5 : 0.25;
+              return [n.latitude, n.longitude, intensity];
+           });
+           setHeatmapPoints(points);
+        }
 
         setStats([
           { label: 'Field Assets', value: String(volCount || 0), change: 'READY', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
@@ -178,10 +222,19 @@ export default function Dashboard() {
                   <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Satellite Relay Active</p>
                </div>
             </div>
-            <div className="flex gap-3">
-               {[1,2,3].map(i => (
-                 <div key={i} className={`w-2.5 h-2.5 rounded-full ${i===1?'bg-primary shadow-[0_0_10px_var(--primary)]':i===2?'bg-secondary':'bg-accent'} animate-pulse`} style={{animationDelay: `${i*0.2}s`}}></div>
-               ))}
+            <div className="flex items-center gap-4">
+               <button 
+                  onClick={() => setShowHeatmap(!showHeatmap)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${showHeatmap ? 'bg-primary text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-muted text-muted-foreground hover:text-foreground border border-border/50'}`}
+               >
+                  <Layers size={14} />
+                  {showHeatmap ? 'Heatmap: ON' : 'Heatmap: OFF'}
+               </button>
+               <div className="flex gap-2 ml-2">
+                  {[1,2,3].map(i => (
+                    <div key={i} className={`w-2.5 h-2.5 rounded-full ${i===1?'bg-primary shadow-[0_0_10px_var(--primary)]':i===2?'bg-secondary':'bg-accent'} animate-pulse`} style={{animationDelay: `${i*0.2}s`}}></div>
+                  ))}
+               </div>
             </div>
           </div>
           <div className="relative flex-1 min-h-[500px] overflow-hidden">
@@ -190,22 +243,26 @@ export default function Dashboard() {
                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                />
-               {SAMPLES.map(sample => (
-                 <Marker 
-                    key={sample.id} 
-                    position={[sample.lat, sample.lng]} 
-                    icon={sample.type === 'unit' ? blueIcon : redIcon}
-                 >
-                    <Popup className="premium-popup">
-                       <div className="p-2 space-y-1 text-black font-bold">
-                          <p className="font-black text-[10px] uppercase italic tracking-wider">{sample.title}</p>
-                          <p className={`text-[8px] font-bold uppercase ${sample.type === 'unit' ? 'text-blue-600' : 'text-red-600'}`}>
-                            {sample.type === 'unit' ? 'Asset: Operational' : 'Objective: Verified'}
-                          </p>
-                       </div>
-                    </Popup>
-                 </Marker>
-               ))}
+               {showHeatmap ? (
+                 <HeatmapLayer points={heatmapPoints.length > 0 ? heatmapPoints : SAMPLES.map(s => [s.lat, s.lng, s.type === 'need' ? 1.0 : 0.5])} />
+               ) : (
+                 SAMPLES.map(sample => (
+                   <Marker 
+                      key={sample.id} 
+                      position={[sample.lat, sample.lng]} 
+                      icon={sample.type === 'unit' ? blueIcon : redIcon}
+                   >
+                      <Popup className="premium-popup">
+                         <div className="p-2 space-y-1 text-black font-bold">
+                            <p className="font-black text-[10px] uppercase italic tracking-wider">{sample.title}</p>
+                            <p className={`text-[8px] font-bold uppercase ${sample.type === 'unit' ? 'text-blue-600' : 'text-red-600'}`}>
+                              {sample.type === 'unit' ? 'Asset: Operational' : 'Objective: Verified'}
+                            </p>
+                         </div>
+                      </Popup>
+                   </Marker>
+                 ))
+               )}
              </MapContainer>
              
              {/* Map Data Overlay */}
