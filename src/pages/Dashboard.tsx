@@ -69,6 +69,16 @@ function HeatmapLayer({ points }: { points: [number, number, number][] }) {
   return null;
 }
 
+function MapController({ center }: { center: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.flyTo(center, 15, { animate: true, duration: 1.5 });
+    }
+  }, [center, map]);
+  return null;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState([
     { label: 'Field Assets', value: '0', change: 'ACTIVE', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
@@ -80,6 +90,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [heatmapPoints, setHeatmapPoints] = useState<[number, number, number][]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -239,6 +250,7 @@ export default function Dashboard() {
           </div>
           <div className="relative flex-1 min-h-[500px] overflow-hidden">
              <MapContainer center={[17.3850, 78.4867]} zoom={12} style={{ height: '100%', width: '100%' }} className="z-0">
+               <MapController center={selectedLocation} />
                <TileLayer
                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -246,22 +258,42 @@ export default function Dashboard() {
                {showHeatmap ? (
                  <HeatmapLayer points={heatmapPoints.length > 0 ? heatmapPoints : SAMPLES.map(s => [s.lat, s.lng, s.type === 'need' ? 1.0 : 0.5])} />
                ) : (
-                 SAMPLES.map(sample => (
-                   <Marker 
-                      key={sample.id} 
-                      position={[sample.lat, sample.lng]} 
-                      icon={sample.type === 'unit' ? blueIcon : redIcon}
-                   >
-                      <Popup className="premium-popup">
-                         <div className="p-2 space-y-1 text-black font-bold">
-                            <p className="font-black text-[10px] uppercase italic tracking-wider">{sample.title}</p>
-                            <p className={`text-[8px] font-bold uppercase ${sample.type === 'unit' ? 'text-blue-600' : 'text-red-600'}`}>
-                              {sample.type === 'unit' ? 'Asset: Operational' : 'Objective: Verified'}
-                            </p>
-                         </div>
-                      </Popup>
-                   </Marker>
-                 ))
+                 <>
+                   {SAMPLES.map(sample => (
+                     <Marker 
+                        key={sample.id} 
+                        position={[sample.lat, sample.lng]} 
+                        icon={sample.type === 'unit' ? blueIcon : redIcon}
+                     >
+                        <Popup className="premium-popup">
+                           <div className="p-2 space-y-1 text-black font-bold">
+                              <p className="font-black text-[10px] uppercase italic tracking-wider">{sample.title}</p>
+                              <p className={`text-[8px] font-bold uppercase ${sample.type === 'unit' ? 'text-blue-600' : 'text-red-600'}`}>
+                                {sample.type === 'unit' ? 'Asset: Operational' : 'Objective: Verified'}
+                              </p>
+                           </div>
+                        </Popup>
+                     </Marker>
+                   ))}
+                   {recentNeeds.map(need => (
+                     need.latitude && need.longitude ? (
+                       <Marker 
+                          key={`need-${need.id}`} 
+                          position={[need.latitude, need.longitude]} 
+                          icon={redIcon}
+                       >
+                          <Popup className="premium-popup">
+                             <div className="p-2 space-y-1 text-black font-bold">
+                                <p className="font-black text-[10px] uppercase italic tracking-wider">{need.title}</p>
+                                <p className="text-[8px] font-bold uppercase text-red-600">
+                                  Priority: {need.priority || 'Critical'}
+                                </p>
+                             </div>
+                          </Popup>
+                       </Marker>
+                     ) : null
+                   ))}
+                 </>
                )}
              </MapContainer>
              
@@ -286,7 +318,17 @@ export default function Dashboard() {
               </div>
               <div className="space-y-4 flex-1">
                  {recentNeeds.map((need, idx) => (
-                    <div key={need.id} className="p-5 rounded-2xl bg-muted/30 border border-border/50 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer group animate-in slide-in-from-right duration-500" style={{animationDelay: `${idx*0.1}s`}}>
+                    <div 
+                        key={need.id} 
+                        onClick={() => {
+                          if (need.latitude && need.longitude) {
+                            setSelectedLocation([need.latitude, need.longitude]);
+                            setShowHeatmap(false);
+                          }
+                        }}
+                        className="p-5 rounded-2xl bg-muted/30 border border-border/50 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer group animate-in slide-in-from-right duration-500" 
+                        style={{animationDelay: `${idx*0.1}s`}}
+                    >
                        <div className="flex gap-5 items-start">
                           <div className={`p-2.5 rounded-xl ${need.priority === 'critical' ? 'bg-destructive/10 text-destructive' : 'bg-secondary/10 text-secondary'} border border-current/20`}>
                              <AlertTriangle size={18} />

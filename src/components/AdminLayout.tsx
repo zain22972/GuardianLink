@@ -84,12 +84,6 @@ export default function AdminLayout({ children, setRole, isDark, toggleTheme }: 
              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.4em]">Grid Status: Operational</p>
           </div>
           <div className="flex items-center gap-6">
-            <div className="flex -space-x-3 group cursor-pointer">
-               {[1,2,3].map(i => (
-                 <div key={i} className="w-9 h-9 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] font-black ring-2 ring-transparent group-hover:ring-primary/20 transition-all">U{i}</div>
-               ))}
-               <div className="w-9 h-9 rounded-full border-2 border-background bg-primary text-white flex items-center justify-center text-[10px] font-black">+</div>
-            </div>
             <div className="h-8 w-px bg-border/50 mx-2"></div>
             <button 
                onClick={toggleTheme}
