@@ -49,8 +49,10 @@ function HeatmapLayer({ points }: { points: [number, number, number][] }) {
     
     (window as any).L = L;
     let heatLayer: any = null;
+    let cancelled = false;
 
     import('leaflet.heat').then(() => {
+      if (cancelled) return;
       heatLayer = (L as any).heatLayer(points, {
         radius: 35,
         blur: 25,
@@ -61,6 +63,7 @@ function HeatmapLayer({ points }: { points: [number, number, number][] }) {
     }).catch(err => console.error("Failed to load leaflet.heat", err));
 
     return () => {
+      cancelled = true;
       if (heatLayer) {
         map.removeLayer(heatLayer);
       }
