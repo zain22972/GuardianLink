@@ -104,6 +104,12 @@ export default function Login({ setRole, isDark, toggleTheme }: LoginProps) {
                 </div>
                 <ArrowRight size={20} className="text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
               </button>
+
+              <div className="pt-4 mt-2 border-t border-border/50 mx-6 text-center">
+                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  Admin Credentials: <span className="text-primary opacity-80">admin</span> / <span className="text-primary opacity-80">admin</span>
+                </p>
+              </div>
             </>
           ) : (
             <form onSubmit={handleAdminLogin} className="p-6 space-y-6 animate-in slide-in-from-right-4 duration-500">
@@ -138,6 +144,10 @@ export default function Login({ setRole, isDark, toggleTheme }: LoginProps) {
                         required
                      />
                   </div>
+               </div>
+
+               <div className="bg-primary/5 border border-primary/10 p-3 rounded-xl text-center">
+                  <p className="text-[9px] font-black text-primary uppercase tracking-widest opacity-70">Admin Protocol: admin / admin</p>
                </div>
 
                {error && (
