@@ -106,8 +106,8 @@ export default function Login({ setRole, isDark, toggleTheme }: LoginProps) {
               </button>
 
               <div className="pt-4 mt-2 border-t border-border/50 mx-6 text-center">
-                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                  Admin Credentials: <span className="text-primary opacity-80">admin</span> / <span className="text-primary opacity-80">admin</span>
+                <p className="text-[8px] font-black tracking-[0.2em] text-muted-foreground uppercase">
+                  Admin Credentials: <span className="text-primary opacity-80 normal-case">admin</span> / <span className="text-primary opacity-80 normal-case">admin</span>
                 </p>
               </div>
             </>
@@ -128,8 +128,8 @@ export default function Login({ setRole, isDark, toggleTheme }: LoginProps) {
                         type="text" 
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="USERNAME"
-                        className="w-full bg-muted border border-border rounded-xl px-5 py-4 text-sm font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:opacity-30"
+                        placeholder="username"
+                        className="w-full bg-muted border border-border rounded-xl px-5 py-4 text-sm font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:opacity-30"
                         required
                      />
                   </div>
@@ -147,7 +147,7 @@ export default function Login({ setRole, isDark, toggleTheme }: LoginProps) {
                </div>
 
                <div className="bg-primary/5 border border-primary/10 p-3 rounded-xl text-center">
-                  <p className="text-[9px] font-black text-primary uppercase tracking-widest opacity-70">Admin Protocol: admin / admin</p>
+                  <p className="text-[9px] font-black text-primary tracking-widest opacity-70">Admin Protocol: <span className="normal-case">admin / admin</span></p>
                </div>
 
                {error && (
