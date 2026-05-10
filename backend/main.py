@@ -109,7 +109,26 @@ async def chat_with_eva(body: ChatRequest):
 @app.get("/health")
 async def health_check():
     """Simple health check for Render."""
-    return {"status": "alive", "version": "v1.3-new-key"}
+    return {"status": "alive", "version": "v1.4-diagnostic"}
+
+@app.get("/test-gemini")
+async def test_gemini():
+    """Diagnostic endpoint to test Gemini connectivity."""
+    if not GEMINI_API_KEY:
+        return {"error": "No API key configured"}
+    
+    results = {}
+    models_to_test = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-flash-latest"]
+    
+    for model_name in models_to_test:
+        try:
+            test_model = genai.GenerativeModel(model_name)
+            response = test_model.generate_content("Say 'hello' in one word.")
+            results[model_name] = {"status": "success", "text": response.text}
+        except Exception as e:
+            results[model_name] = {"status": "error", "message": str(e)}
+            
+    return results
 
 @app.post("/extract")
 async def extract_need(request: ExtractRequest):
