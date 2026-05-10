@@ -120,20 +120,25 @@ async def get_ip():
 
 @app.get("/test-gemini")
 async def test_gemini():
-    """Diagnostic endpoint to test Gemini connectivity."""
+    """Diagnostic endpoint to test Gemini connectivity via REST v1 vs v1beta."""
     if not GEMINI_API_KEY:
         return {"error": "No API key configured"}
     
     results = {}
-    models_to_test = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-flash-latest"]
+    test_model = "gemini-1.5-flash"
     
-    for model_name in models_to_test:
+    for version in ["v1", "v1beta"]:
+        url = f"https://generativelanguage.googleapis.com/{version}/models/{test_model}:generateContent?key={GEMINI_API_KEY}"
+        payload = {"contents": [{"parts": [{"text": "Say 'hello' in one word."}]}]}
         try:
-            test_model = genai.GenerativeModel(model_name)
-            response = test_model.generate_content("Say 'hello' in one word.")
-            results[model_name] = {"status": "success", "text": response.text}
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(url, json=payload, timeout=10.0)
+                if resp.status_code == 200:
+                    results[version] = {"status": "success", "data": resp.json()}
+                else:
+                    results[version] = {"status": f"error {resp.status_code}", "message": resp.text}
         except Exception as e:
-            results[model_name] = {"status": "error", "message": str(e)}
+            results[version] = {"status": "exception", "message": str(e)}
             
     return results
 
