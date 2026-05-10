@@ -120,27 +120,14 @@ async def get_ip():
 
 @app.get("/test-gemini")
 async def test_gemini():
-    """Diagnostic endpoint to test Gemini connectivity via REST v1 vs v1beta."""
-    if not GEMINI_API_KEY:
-        return {"error": "No API key configured"}
-    
-    results = {}
-    test_model = "gemini-1.5-flash"
-    
-    for version in ["v1", "v1beta"]:
-        url = f"https://generativelanguage.googleapis.com/{version}/models/{test_model}:generateContent?key={GEMINI_API_KEY}"
-        payload = {"contents": [{"parts": [{"text": "Say 'hello' in one word."}]}]}
-        try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.post(url, json=payload, timeout=10.0)
-                if resp.status_code == 200:
-                    results[version] = {"status": "success", "data": resp.json()}
-                else:
-                    results[version] = {"status": f"error {resp.status_code}", "message": resp.text}
-        except Exception as e:
-            results[version] = {"status": "exception", "message": str(e)}
-            
-    return results
+    """Diagnostic: List models via REST to see exact names."""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={GEMINI_API_KEY}"
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(url, timeout=10.0)
+            return resp.json()
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.post("/extract")
 async def extract_need(request: ExtractRequest):
