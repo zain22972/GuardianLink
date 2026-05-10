@@ -43,7 +43,7 @@ else:
 if GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY, transport='rest')
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         print("[SUCCESS] Gemini AI initialized successfully.")
     except Exception as e:
         print(f"[ERROR] Error initializing Gemini: {str(e)}")
@@ -81,7 +81,7 @@ class ExtractedNeed(BaseModel):
 # EVA (Electronic Virtual Assistant) Neural Core
 # Friendly, supportive, and emphasizing 'botting is help'
 eva_model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
+    model_name="gemini-2.5-flash",
     system_instruction=(
         "You are EVA, a warm, empathetic, and highly capable tactical assistant for GuardianLink. "
         "While you are an AI, you speak with the care and intuition of a supportive female colleague who genuinely cares about the safety of every responder in the field. "
