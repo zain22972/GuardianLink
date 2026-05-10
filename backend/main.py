@@ -108,7 +108,7 @@ async def chat_with_eva(body: ChatRequest):
 @app.get("/health")
 async def health_check():
     """Simple health check for Render."""
-    return {"status": "alive"}
+    return {"status": "alive", "version": "v1.1-2.5flash"}
 
 @app.post("/extract")
 async def extract_need(request: ExtractRequest):
