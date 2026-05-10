@@ -109,25 +109,7 @@ async def chat_with_eva(body: ChatRequest):
 @app.get("/health")
 async def health_check():
     """Simple health check for Render."""
-    return {"status": "alive", "version": "v1.5-ip-check"}
-
-@app.get("/ip")
-async def get_ip():
-    """Check the server's public IP."""
-    async with httpx.AsyncClient() as client:
-        resp = await client.get("https://ipinfo.io/json")
-        return resp.json()
-
-@app.get("/test-gemini")
-async def test_gemini():
-    """Diagnostic: List models via REST to see exact names."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={GEMINI_API_KEY}"
-    try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url, timeout=10.0)
-            return resp.json()
-    except Exception as e:
-        return {"error": str(e)}
+    return {"status": "alive", "version": "v1.6-final"}
 
 @app.post("/extract")
 async def extract_need(request: ExtractRequest):
