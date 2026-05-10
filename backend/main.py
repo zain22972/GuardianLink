@@ -109,7 +109,14 @@ async def chat_with_eva(body: ChatRequest):
 @app.get("/health")
 async def health_check():
     """Simple health check for Render."""
-    return {"status": "alive", "version": "v1.4-diagnostic"}
+    return {"status": "alive", "version": "v1.5-ip-check"}
+
+@app.get("/ip")
+async def get_ip():
+    """Check the server's public IP."""
+    async with httpx.AsyncClient() as client:
+        resp = await client.get("https://ipinfo.io/json")
+        return resp.json()
 
 @app.get("/test-gemini")
 async def test_gemini():
