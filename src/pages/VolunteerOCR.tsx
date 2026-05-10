@@ -34,7 +34,7 @@ export default function VolunteerOCR() {
         .getPublicUrl(uploadData.path);
 
       // 3. Call Python Backend with Timeout
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8003';
+      let backendUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8003').replace(/\/$/, '');
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for cold starts
@@ -60,7 +60,8 @@ export default function VolunteerOCR() {
         if (fetchErr.name === 'AbortError') {
           throw new Error('Backend took too long to respond. The server is likely waking up — please try again in 30 seconds.');
         }
-        throw new Error(`Connection failed: Check if ${backendUrl} is correct and live.`);
+        console.error('Fetch error:', fetchErr);
+        throw new Error(`Connection failed: ${fetchErr.message || 'Check if ' + backendUrl + ' is correct and live.'}`);
       }
     } catch (err: any) {
       console.error('OCR Error:', err);

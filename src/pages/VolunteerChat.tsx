@@ -60,7 +60,7 @@ export default function VolunteerChat() {
 
     try {
       // Tactical Uplink to Gemini Backend
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8002';
+      let backendUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8003').replace(/\/$/, '');
       const response = await fetch(`${backendUrl}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
